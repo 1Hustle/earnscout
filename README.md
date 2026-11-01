@@ -26,7 +26,10 @@ wallet or pay to claim?) are exactly the checks EarnScout automates.
    (JavaScript-heavy pages can be pasted as text instead).
 2. **Rule engine** (`earnscout/rules.py`) - deterministic pattern checks that need
    no AI: wallet-connect demands, seed-phrase mentions, deposit-to-unlock fees,
-   guaranteed-return promises, manufactured urgency, referral-only spread, and more.
+   upfront job/activation fees, wallet "rectification" prompts, unlimited token
+   approvals, guaranteed returns, Ponzi multipliers, fixed daily-percentage
+   promises, gift-card/wire payment demands, withheld contract addresses,
+   manufactured urgency, referral-only spread, and more (full catalogue below).
    Every hit deducts points and keeps the matched text as evidence.
 3. **Research pass** (`earnscout/analyze.py`) - one structured NEAR AI Cloud call
    extracts: who runs it, whether the prize math is plausible, the payout path,
@@ -58,6 +61,13 @@ Then:
 - **Do this:** paste `examples/legit_bounty.txt` instead.
   **See this:** a report scoring 70 or above, band "Looks credible", with green
   signals for stated terms, deadline and payout method.
+- **Do this:** paste `examples/fake_job_lure.txt`.
+  **See this:** a report at the bottom of the scale, band "High risk", flagging
+  the upfront training fee, the gift-card/wire payment demand, the guaranteed
+  daily income and the chat-app-only recruitment.
+- **Do this:** paste `examples/legit_gig.txt`.
+  **See this:** a report scoring 70 or above, with green signals for escrow
+  protection and for stating that no fee is required to apply.
 
 ## Run the tests
 
@@ -66,8 +76,36 @@ python3 tests/run_tests.py                    # rules-only, no key needed
 NEAR_AI_API_KEY=sk-... python3 tests/run_tests.py   # full mode, with research pass
 ```
 
-Both modes assert: the scam lure scores below 45 and the legitimate bounty
-scores 70 or above.
+Both modes assert: both lures (airdrop drainer, fake job) score below 45 and
+both legitimate offers (bounty, freelance gig) score 70 or above - and that
+the wallet flag fires on the drainer and the upfront-fee flag fires on the
+fake job.
+
+## Rule catalogue
+
+The deterministic engine (`earnscout/rules.py`) - points are deducted from 100:
+
+| Points | Pattern | Why |
+| --- | --- | --- |
+| -40 | Mentions seed phrase / private key | No legitimate opportunity ever needs it |
+| -35 | Deposit or fee required to unlock/claim | The classic advance-fee trap |
+| -30 | Upfront job / activation / training fee | Real employers do not charge workers to start |
+| -25 | Asks you to connect a wallet | The standard drainer entry point |
+| -25 | Wallet "verification / rectification" prompt | Drainer front; real wallets never ask this on a website |
+| -25 | Asks for unlimited token approval | Lets a malicious contract drain the token at any time |
+| -25 | Payment demanded by gift card / wire | Irreversible rails are chosen so victims cannot charge back |
+| -20 | Promises guaranteed returns | A regulated-claims red flag, typical of scams |
+| -20 | Promises multiplied returns (2x/3x/10x) | The signature of Ponzi-style schemes |
+| -20 | Promises fixed daily percentage returns | No real opportunity pays a fixed daily % |
+| -15 | Unsolicited "you have won" claim | Prizes never entered for are bait |
+| -15 | Token contract address withheld until later | Nothing can be checked on-chain |
+| -12 | No verifiable team information | No one accountable for the promises |
+| -10 | Manufactured urgency (FCFS / act now) | Pressure designed to stop you checking |
+| -8 | Recruitment only via a chat app | No platform record, no escrow, no recourse |
+| -8 | Referral-link distribution | How unverifiable schemes recruit; a caution, not proof |
+
+Green signals credited: states terms/eligibility, states a deadline, names a
+payout method, uses escrow, names a contract/audit, states no payment needed.
 
 ## Project layout
 
@@ -76,7 +114,7 @@ scores 70 or above.
 - `earnscout/rules.py` - deterministic red-flag engine
 - `earnscout/analyze.py` - orchestration: rules + NEAR AI pass + scoring
 - `earnscout/near_ai.py` - minimal NEAR AI Cloud client (key read from env only)
-- `examples/` - the two reference cases used by the tests and this README
+- `examples/` - four reference cases (two lures, two legitimate offers) used by the tests and this README
 - `tests/run_tests.py` - the scoring assertions above
 
 ## After the hackathon
