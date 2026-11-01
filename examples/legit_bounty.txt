@@ -1,0 +1,8 @@
+Research Writing Bounty - Community Education Series
+A established Web3 foundation is sponsoring a research bounty for writers.
+Task: write a 1,500-word explainer article on how cross-chain intents work, aimed at beginners.
+Eligibility: open to all writers; one submission per person; plagiarism results in disqualification (see full terms).
+Deadline: submissions close on 18 November at 21:59 UTC. Winners announced within 7 days of the deadline.
+Prize pool: 200 USDC total - 100 USDC first place, 60 USDC second, 40 USDC third.
+Payment: prizes are paid in USDC via the bounty platform to the wallet on your profile within 14 days of the announcement.
+Judging criteria: accuracy 40%, clarity 30%, originality 30%. By entering you agree to the platform terms of service.
