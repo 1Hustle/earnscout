@@ -63,7 +63,11 @@ class Handler(BaseHTTPRequestHandler):
         self._send(FORM)
 
     def do_POST(self):
-        length = int(self.headers.get("Content-Length", 0))
+        try:
+            length = int(self.headers.get("Content-Length", 0))
+        except ValueError:
+            length = 0
+        length = max(0, min(length, 300_000))
         data = parse_qs(self.rfile.read(length).decode("utf-8", errors="replace"))
         url = (data.get("url") or [""])[0].strip()
         text = (data.get("text") or [""])[0].strip()
@@ -77,7 +81,12 @@ class Handler(BaseHTTPRequestHandler):
         if not text:
             self._send("<p style='font-family:system-ui'>Give me a link or some text to check.</p><p><a href='/'>Back</a></p>")
             return
-        self._send(render_report(analyze(text, source)))
+        try:
+            report = analyze(text, source)
+        except ValueError as e:
+            self._send("<p style='font-family:system-ui'>%s</p><p><a href='/'>Back</a></p>" % html.escape(str(e)))
+            return
+        self._send(render_report(report))
 
     def _send(self, body):
         b = body.encode("utf-8")
