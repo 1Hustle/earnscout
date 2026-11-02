@@ -23,7 +23,11 @@ wallet or pay to claim?) are exactly the checks EarnScout automates.
 ## How it works
 
 1. **Fetch** - the page is downloaded and reduced to readable text
-   (JavaScript-heavy pages can be pasted as text instead).
+   (JavaScript-heavy pages can be pasted as text instead). Before any
+   request - and again at every redirect hop - the target host is
+   resolved and refused if it points at a local or private network
+   address, so the fetcher cannot be used to probe internal services
+   or cloud metadata endpoints.
 2. **Rule engine** (`earnscout/rules.py`) - deterministic pattern checks that need
    no AI: wallet-connect demands, seed-phrase mentions, deposit-to-unlock fees,
    upfront job/activation fees, wallet "rectification" prompts, unlimited token
@@ -39,6 +43,21 @@ wallet or pay to claim?) are exactly the checks EarnScout automates.
 
 If `NEAR_AI_API_KEY` is not set, EarnScout still runs in **rules-only mode** and
 says so on the report - it never pretends the research pass ran.
+
+## Safety of the tool itself
+
+A scam checker that can be abused is not much of a security tool, so:
+
+- **No SSRF surface.** The fetcher refuses loopback, private, link-local,
+  multicast and reserved addresses (including cloud metadata IPs) at the
+  first request and at every redirect hop.
+- **No fake scores.** Empty or near-empty input is refused outright -
+  EarnScout never returns a confident score for text it could not
+  actually examine.
+- **Local-only UI.** The web app binds to `127.0.0.1` and caps request
+  size; it is a demo front end, not a hosted service.
+- **Key hygiene.** The NEAR AI Cloud key is read from the environment
+  only, never logged, stored or committed (see `.env.example`).
 
 ## Run it
 
@@ -79,7 +98,9 @@ NEAR_AI_API_KEY=sk-... python3 tests/run_tests.py   # full mode, with research p
 Both modes assert: both lures (airdrop drainer, fake job) score below 45 and
 both legitimate offers (bounty, freelance gig) score 70 or above - and that
 the wallet flag fires on the drainer and the upfront-fee flag fires on the
-fake job.
+fake job. The suite also checks the tool's own guards: empty or near-empty
+input is refused instead of scored, and the fetcher refuses local/private
+network targets while allowing public hosts.
 
 ## Rule catalogue
 
@@ -110,7 +131,7 @@ payout method, uses escrow, names a contract/audit, states no payment needed.
 ## Project layout
 
 - `app.py` - web UI (stdlib `http.server`), form in, report out
-- `earnscout/fetch.py` - URL fetching and HTML-to-text
+- `earnscout/fetch.py` - SSRF-guarded URL fetching and HTML-to-text
 - `earnscout/rules.py` - deterministic red-flag engine
 - `earnscout/analyze.py` - orchestration: rules + NEAR AI pass + scoring
 - `earnscout/near_ai.py` - minimal NEAR AI Cloud client (key read from env only)
