@@ -47,7 +47,15 @@ def _ai_pass(text):
     raise last_err
 
 
+MIN_TEXT = 40  # a real opportunity needs at least a few sentences to vet
+
+
 def analyze(text, source=""):
+    text = (text or "").strip()
+    if len(text) < MIN_TEXT:
+        raise ValueError(
+            "Not enough text to vet: paste at least a few sentences of the "
+            "opportunity. EarnScout will not score empty or near-empty input.")
     deductions, red, green = scan(text)
     report = {
         "source": source,
